@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="choosePictureBtn"
+            android:text="选择图片" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="disposeBtn"
+            android:text="图片处理" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <CheckBox
+            android:id="@+id/left_rotation_rb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="左旋转90度" />
+
+        <CheckBox
+            android:id="@+id/de_skew_rb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="偏斜校正"
+            android:visibility="gone" />
+
+        <CheckBox
+            android:id="@+id/gray_rb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="灰度" />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <CheckBox
+            android:id="@+id/blur_rb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="均值滤波" />
+
+        <CheckBox
+            android:id="@+id/gaussianBlur_rb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="高斯滤波" />
+
+        <CheckBox
+            android:id="@+id/medianBlur_rb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="中值滤波" />
+
+        <CheckBox
+            android:id="@+id/sharpen_rb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="锐化" />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <CheckBox
+            android:id="@+id/sobelXY_rb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="sobel_XY梯度" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <CheckBox
+            android:id="@+id/binarization_rb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="二值化" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="膨胀：" />
+
+            <CheckBox
+                android:id="@+id/dilate_rb0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="矩形结构" />
+
+            <CheckBox
+                android:id="@+id/dilate_rb1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="十字形结构" />
+
+            <CheckBox
+                android:id="@+id/dilate_rb2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="椭圆结构体" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/dilate_value_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="膨胀值：3" />
+
+            <SeekBar
+                android:id="@+id/dilate_seekbar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="4dp"
+                android:layout_weight="1"
+                android:max="30"
+                android:min="3" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="腐蚀：" />
+
+            <CheckBox
+                android:id="@+id/erode_rb0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="矩形结构" />
+
+            <CheckBox
+                android:id="@+id/erode_rb1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="十字形结构" />
+
+            <CheckBox
+                android:id="@+id/erode_rb2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="椭圆结构体" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/erode_value_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="腐蚀值：3" />
+
+            <SeekBar
+                android:id="@+id/erode_seekbar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="4dp"
+                android:layout_weight="1"
+                android:max="30"
+                android:min="3" />
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="形态处理：" />
+
+        <CheckBox
+            android:id="@+id/morphologyEx_rb2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="开操作" />
+
+        <CheckBox
+            android:id="@+id/morphologyEx_rb3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="闭操作" />
+
+        <CheckBox
+            android:id="@+id/morphologyEx_rb4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="心态学梯度" />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="70dp">
+
+        <CheckBox
+            android:id="@+id/morphologyEx_rb5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="顶帽操作" />
+
+        <CheckBox
+            android:id="@+id/morphologyEx_rb6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="黑帽操作" />
+
+        <CheckBox
+            android:id="@+id/morphologyEx_rb7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="击中击不中运算" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/morphologyEx_value_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="处理值：3" />
+
+        <SeekBar
+            android:id="@+id/morphologyEx_seekbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:max="30"
+            android:min="3" />
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,6 @@
+include ':ocr_ui'
+include ':sdk'
+include ':lib'
+include ':app'
+rootProject.name = "Ocr-test"
+
