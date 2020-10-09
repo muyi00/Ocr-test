@@ -31,5 +31,15 @@
         android:onClick="processingImageBtn"
         android:text="图片处理" />
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="processingImageBtn2"
+        android:text="图片处理2" />
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="processingImageBtn3"
+        android:text="图片处理3" />
 </LinearLayout>

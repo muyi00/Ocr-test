@@ -406,9 +406,19 @@ public class ProcessingImageActivity extends AppCompatActivity {
         if (src.empty()) {
             return;
         }
-
+        src = ProcessingImageUtils.rotateLeft(src);
         //1.转化成灰度图
         src = ProcessingImageUtils.gray(src);
+        //均值滤波
+        src = ProcessingImageUtils.blur(src);
+        //高斯滤波
+        src = ProcessingImageUtils.gaussianBlur(src);
+        //中值滤波
+        src = ProcessingImageUtils.medianBlur(src);
+        //二值化
+        src = ProcessingImageUtils.threshold(src);
+
+
 
         //2.形态学变换的预处理，得到可以查找矩形的轮廓
         Mat dilation = preprocess(src);
@@ -416,12 +426,11 @@ public class ProcessingImageActivity extends AppCompatActivity {
         //3.查找和筛选文字区域
         List<RotatedRect> rects = findTextRegion(dilation);
         //4.用绿线画出这些找到的轮廓
-        for (RotatedRect rotatedRect:rects ){
-            Point p[]=new Point[4];
+        for (RotatedRect rotatedRect : rects) {
+            Point p[] = new Point[4];
             rotatedRect.points(p);
-            for (int j = 0; j <= 3; j++)
-            {
-                Imgproc.line(src, p[j], p[(j + 1) % 4], new Scalar(0,255,0), 2);
+            for (int j = 0; j <= 3; j++) {
+                Imgproc.line(src, p[j], p[(j + 1) % 4], new Scalar(0, 255, 0), 2);
             }
         }
 
@@ -452,13 +461,13 @@ public class ProcessingImageActivity extends AppCompatActivity {
         Imgproc.dilate(binary, dilate1, element2);
 
         //5.腐蚀一次，去掉细节，表格线等。这里去掉的是竖直的线
-        Mat erode1 = new Mat();
-        Imgproc.dilate(dilate1, erode1, element1);
+//        Mat erode1 = new Mat();
+//        Imgproc.dilate(dilate1, erode1, element1);
 
         //6.再次膨胀，让轮廓明显一些
         Mat dilate2 = new Mat();
-        Imgproc.dilate(erode1, dilate2, element2);
-        return dilate2;
+        Imgproc.dilate(dilate1, dilate2, element2);
+        return dilate1;
     }
 
     //https://blog.csdn.net/yangzm/article/details/81105844
@@ -480,8 +489,10 @@ public class ProcessingImageActivity extends AppCompatActivity {
                 continue;
             }
 
+            MatOfPoint matOfPoint = contours.get(i);
+            MatOfPoint2f curve=new MatOfPoint2f(matOfPoint.toArray());
+
             //轮廓近似，作用较小，approxPolyDP函数有待研究
-            MatOfPoint2f curve = new MatOfPoint2f(contours.get(i));
             double epsilon = 0.001 * Imgproc.arcLength(curve, true);
             MatOfPoint2f approx = new MatOfPoint2f();
             Imgproc.approxPolyDP(curve, approx, epsilon, true);
@@ -503,4 +514,22 @@ public class ProcessingImageActivity extends AppCompatActivity {
         return rects;
 
     }
+
+
+
+    private void dispose4(){
+        //阈值化
+
+        //腐蚀
+
+        //降噪
+
+        //文字区域检测
+
+        //文字提取
+
+
+
+    }
+
 }

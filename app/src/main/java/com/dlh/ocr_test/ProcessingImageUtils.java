@@ -7,14 +7,17 @@ import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -29,6 +32,8 @@ import java.util.Random;
  * <p>
  * tesseract ocr -训练样本库  https://www.jianshu.com/p/55d2d26fa2ff
  * <p>
+ *
+ *     https://blog.csdn.net/qq_20158897/category_9325824.html
  * author : YJ
  * time   : 2020/9/28 11:44
  */
@@ -260,7 +265,6 @@ public class ProcessingImageUtils {
     }
 
 
-
     /**
      * 均值模糊方法: 均值滤波是最简单的滤波，对核进行均值计算，每一个邻域像素都有相同的权值。
      *
@@ -477,8 +481,6 @@ public class ProcessingImageUtils {
     }
 
 
-
-
     /**
      * Harris角点检测
      * <p>
@@ -573,6 +575,136 @@ public class ProcessingImageUtils {
         Bitmap bmp = Bitmap.createBitmap(result.cols(), result.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(result, bmp);
         return bmp;
+    }
+
+///////////////////////////////////////////////////
+
+
+    public static Mat preprocess(Mat src) {
+        //1.Sobel算子，x方向求梯度
+        Mat sobel = new Mat();
+        Imgproc.Sobel(src, sobel, CvType.CV_8U, 1, 0, 3);
+
+        //2.二值化
+        Mat binary = new Mat();
+        Imgproc.threshold(sobel, binary, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_TRIANGLE);
+
+        //3.膨胀和腐蚀操作核设定
+        Mat element1 = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(30, 90));
+        //控制高度设置可以控制上下行的膨胀程度，例如3比4的区分能力更强,但也会造成漏检
+        Mat element2 = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(24, 4));
+
+        //4.膨胀一次，让轮廓突出
+        Mat dilate1 = new Mat();
+        Imgproc.dilate(binary, dilate1, element2);
+
+        //5.腐蚀一次，去掉细节，表格线等。这里去掉的是竖直的线
+        Mat erode1 = new Mat();
+        Imgproc.dilate(dilate1, erode1, element1);
+
+        //6.再次膨胀，让轮廓明显一些
+        Mat dilate2 = new Mat();
+        Imgproc.dilate(dilate1, dilate2, element2);
+        return dilate1;
+    }
+
+    public static List<RotatedRect> findTextRegion(Mat src) {
+        List<RotatedRect> rects = new ArrayList<>();
+        //1.查找轮廓
+        List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+        Mat hierarchy = new Mat();
+        Imgproc.findContours(src, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
+
+        //2.筛选那些面积小的
+        for (int i = 0; i < contours.size(); i++) {
+            //计算当前轮廓的面积
+            double area = Imgproc.contourArea(contours.get(i));
+            //面积小于1000的全部筛选掉
+            if (area < 1000) {
+                continue;
+            }
+
+            MatOfPoint matOfPoint = contours.get(i);
+            MatOfPoint2f curve = new MatOfPoint2f(matOfPoint.toArray());
+
+            //轮廓近似，作用较小，approxPolyDP函数有待研究
+            double epsilon = 0.001 * Imgproc.arcLength(curve, true);
+            MatOfPoint2f approx = new MatOfPoint2f();
+            Imgproc.approxPolyDP(curve, approx, epsilon, true);
+            //找到最小矩形，该矩形可能有方向
+            RotatedRect rect = Imgproc.minAreaRect(curve);
+            //计算高和宽
+            int m_width = rect.boundingRect().width;
+            int m_height = rect.boundingRect().height;
+
+            //筛选那些太细的矩形，留下扁的
+            if (m_height > m_width * 1.2) {
+                continue;
+            }
+
+            //符合条件的rect添加到rects集合中
+            rects.add(rect);
+
+        }
+        return rects;
+
+    }
+
+
+    /***
+     * 获取图片中子Mat集合
+     * @param src
+     * @return
+     */
+    public static List<Mat> getSubMat(Mat src) {
+        //1.转化成灰度图
+        src = ProcessingImageUtils.gray(src);
+        //均值滤波
+        src = ProcessingImageUtils.blur(src);
+        //高斯滤波
+        src = ProcessingImageUtils.gaussianBlur(src);
+        //中值滤波
+        src = ProcessingImageUtils.medianBlur(src);
+        //二值化
+        src = ProcessingImageUtils.threshold(src);
+        Mat historyMat = src.clone();
+
+        //1.Sobel算子，x方向求梯度
+        Mat sobel = new Mat();
+        Imgproc.Sobel(src, sobel, CvType.CV_8U, 1, 0, 3);
+        //2.二值化
+        Mat binary = new Mat();
+        Imgproc.threshold(sobel, binary, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_TRIANGLE);
+        //3.膨胀和腐蚀操作核设定
+        Mat element1 = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(30, 40));
+        //控制高度设置可以控制上下行的膨胀程度，例如3比4的区分能力更强,但也会造成漏检
+        Mat element2 = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(24, 4));
+        //4.膨胀一次，让轮廓突出
+        Mat dilate1 = new Mat();
+        Imgproc.dilate(binary, dilate1, element2);
+        //5.腐蚀一次，去掉细节，表格线等。这里去掉的是竖直的线
+        Mat erode1 = new Mat();
+        Imgproc.dilate(dilate1, erode1, element1);
+        //6.再次膨胀，让轮廓明显一些
+        Mat dilate2 = new Mat();
+        Imgproc.dilate(erode1, dilate2, element2);
+        //3.查找和筛选文字区域
+        List<RotatedRect> rects = ProcessingImageUtils.findTextRegion(dilate2);
+
+        //4.用绿线画出这些找到的轮廓
+        List<Mat> textMats = new LinkedList<>();
+        for (RotatedRect rotatedRect : rects) {
+            Rect rect = rotatedRect.boundingRect();
+            Imgproc.rectangle(historyMat, rect.tl(), rect.br(), new Scalar(255, 0, 0, 255));
+            textMats.add(historyMat.submat(rect));
+
+//            Point p[] = new Point[4];
+//            rotatedRect.points(p);
+//            for (int j = 0; j <= 3; j++) {
+//                Imgproc.line(src, p[j], p[(j + 1) % 4], new Scalar(0, 255, 0), 2);
+//            }
+        }
+        return textMats;
     }
 
 

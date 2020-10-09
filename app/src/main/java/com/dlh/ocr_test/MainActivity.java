@@ -76,13 +76,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void processingImageBtn(View view) {
-        //图片处理
-        startActivity(new Intent(this, ProcessingImageActivity.class));
-    }
+
 
 
     public void tesseractOcrBtn(View view) {
         startActivity(new Intent(this, TesseractActivity.class));
     }
+
+
+    public void processingImageBtn(View view) {
+        //图片处理
+        startActivity(new Intent(this, ProcessingImageActivity.class));
+    }
+
+    public void processingImageBtn2(View view) {
+        //图片处理
+        startActivity(new Intent(this, ProcessingActivity.class));
+    }
+
+    public void processingImageBtn3(View view) {
+        //图片处理
+        startActivity(new Intent(this, Processing3Activity.class));
+    }
+
 }
