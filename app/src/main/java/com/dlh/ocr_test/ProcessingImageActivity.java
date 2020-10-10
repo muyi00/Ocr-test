@@ -52,6 +52,7 @@ public class ProcessingImageActivity extends AppCompatActivity {
     private String imagePath;
     private PermissionUtil permissionUtil;
     private CheckBox left_rotation_rb,
+            correct_rb,
             de_skew_rb,
             medianBlur_rb,
             gray_rb,
@@ -81,6 +82,8 @@ public class ProcessingImageActivity extends AppCompatActivity {
 
         left_rotation_rb = findViewById(R.id.left_rotation_rb);
         de_skew_rb = findViewById(R.id.de_skew_rb);
+        correct_rb = findViewById(R.id.correct_rb);
+
         medianBlur_rb = findViewById(R.id.medianBlur_rb);
         sobelXY_rb = findViewById(R.id.sobelXY_rb);
 
@@ -244,7 +247,7 @@ public class ProcessingImageActivity extends AppCompatActivity {
         new AsyncTaskUtil(this, new AsyncTaskUtil.AsyncCallBack() {
             @Override
             public int asyncProcess() throws InterruptedException {
-                dispose3();
+                dispose2();
                 return 0;
             }
 
@@ -316,6 +319,10 @@ public class ProcessingImageActivity extends AppCompatActivity {
         //灰度
         if (gray_rb.isChecked()) {
             src = ProcessingImageUtils.gray(src);
+        }
+
+        if (correct_rb.isChecked()) {
+            src = ProcessingImageUtils.deSkewText(src);
         }
         //均值滤波
         if (blur_rb.isChecked()) {
@@ -393,7 +400,6 @@ public class ProcessingImageActivity extends AppCompatActivity {
             Imgproc.morphologyEx(src, src, flag, kernel);
         }
 
-
         //将矩阵转换为图像
         disposBitmap = Bitmap.createBitmap(src.cols(), src.rows(), Bitmap.Config.RGB_565);
         org.opencv.android.Utils.matToBitmap(src, disposBitmap);
@@ -417,7 +423,6 @@ public class ProcessingImageActivity extends AppCompatActivity {
         src = ProcessingImageUtils.medianBlur(src);
         //二值化
         src = ProcessingImageUtils.threshold(src);
-
 
 
         //2.形态学变换的预处理，得到可以查找矩形的轮廓
@@ -490,7 +495,7 @@ public class ProcessingImageActivity extends AppCompatActivity {
             }
 
             MatOfPoint matOfPoint = contours.get(i);
-            MatOfPoint2f curve=new MatOfPoint2f(matOfPoint.toArray());
+            MatOfPoint2f curve = new MatOfPoint2f(matOfPoint.toArray());
 
             //轮廓近似，作用较小，approxPolyDP函数有待研究
             double epsilon = 0.001 * Imgproc.arcLength(curve, true);
@@ -516,8 +521,7 @@ public class ProcessingImageActivity extends AppCompatActivity {
     }
 
 
-
-    private void dispose4(){
+    private void dispose4() {
         //阈值化
 
         //腐蚀
@@ -527,7 +531,6 @@ public class ProcessingImageActivity extends AppCompatActivity {
         //文字区域检测
 
         //文字提取
-
 
 
     }

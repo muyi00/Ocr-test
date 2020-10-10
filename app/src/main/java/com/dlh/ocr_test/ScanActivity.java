@@ -22,7 +22,7 @@ public class ScanActivity extends AppCompatActivity {
     private Vibrator vibrator;
     private TextView tvResult;
     private ImageView image;
-    private CheckBox binarization_cb;
+    private CheckBox processing_cb;
     private TessTwoScanner tessTwoScanner;
 
     @Override
@@ -32,7 +32,7 @@ public class ScanActivity extends AppCompatActivity {
         scannerView = findViewById(R.id.sv);
         tvResult = findViewById(R.id.tv_result);
         image = findViewById(R.id.image);
-        binarization_cb = findViewById(R.id.binarization_cb);
+        processing_cb = findViewById(R.id.processing_cb);
 
         tessTwoScanner = new TessTwoScanner(ScanActivity.this);
 
@@ -55,10 +55,10 @@ public class ScanActivity extends AppCompatActivity {
             }
         });
 
-        binarization_cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        processing_cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                tessTwoScanner.setBinarization(isChecked);
+                tessTwoScanner.setProcessing(isChecked);
             }
         });
     }

@@ -48,6 +48,12 @@
             android:layout_height="wrap_content"
             android:text="灰度" />
 
+        <CheckBox
+            android:id="@+id/correct_rb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="矫正" />
+
 
     </LinearLayout>
 

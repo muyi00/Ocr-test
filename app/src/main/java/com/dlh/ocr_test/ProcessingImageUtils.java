@@ -32,8 +32,8 @@ import java.util.Random;
  * <p>
  * tesseract ocr -训练样本库  https://www.jianshu.com/p/55d2d26fa2ff
  * <p>
- *
- *     https://blog.csdn.net/qq_20158897/category_9325824.html
+ * <p>
+ * https://blog.csdn.net/qq_20158897/category_9325824.html
  * author : YJ
  * time   : 2020/9/28 11:44
  */
@@ -257,7 +257,7 @@ public class ProcessingImageUtils {
          * THRESH_OTSU	        8	大津法自动寻求全局阈值
          * THRESH_TRIANGLE	    16	三角形法自动寻求全局阈值
          */
-        //Imgproc.threshold(gray, binary, 0, 255, Imgproc.THRESH_BINARY_INV | Imgproc.THRESH_OTSU);
+        //Imgproc.threshold(src, binary, 0, 255, Imgproc.THRESH_BINARY_INV | Imgproc.THRESH_OTSU);
         Imgproc.threshold(src, binary, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_TRIANGLE);
         //反转数组的每一位。
         //Core.bitwise_not(binary, binary);
@@ -707,5 +707,107 @@ public class ProcessingImageUtils {
         return textMats;
     }
 
+
+    /**
+     * Wellner自适应阈值算法的二维扩展
+     *
+     * @param grayBitmap:灰度图像
+     * @param srcBitmap:原始图像
+     * @param s:用以求出正方形的边长
+     * @param t:比率（1-t/100）
+     */
+    public static Bitmap analyzeFilterPixelMap(Bitmap grayBitmap, Bitmap srcBitmap, int s, int t) {
+        //获取位图的宽
+        int width = grayBitmap.getWidth();
+        //获取位图的高
+        int height = grayBitmap.getHeight();
+        //通过位图的大小创建像素点数组
+        int[] grayPixels = new int[width * height];
+        int[] srcPixels = new int[width * height];
+        //当前像素点到正方形边界的像素点个数
+        int s_len = (int) (width / s * 0.5);
+        double t_precent = 1 - t / 100.0;
+        //积分图像
+        long[][] integralImageSumArr = new long[height][width];
+        grayBitmap.getPixels(grayPixels, 0, width, 0, 0, width, height);
+        srcBitmap.getPixels(srcPixels, 0, width, 0, 0, width, height);
+        /****** 第一步：计算积分图像 ******/
+        for (int h = 0; h < height; h++) {
+            for (int w = 0; w < width; w++) {
+                /**
+                 * A--B
+                 * |  |
+                 * C--D
+                 *积分图算法： D = B + C - A + Xd; 其中Xd表示D位置的灰度值
+                 * */
+                int currentPixelGray = grayPixels[w + h * width] & 0x000000FF;
+                integralImageSumArr[h][w] =
+                        (h < 1 ? 0 : integralImageSumArr[h - 1][w])
+                                + (w < 1 ? 0 : integralImageSumArr[h][w - 1])
+                                - ((h < 1 || w < 1) ? 0 : integralImageSumArr[h - 1][w - 1])
+                                + currentPixelGray;
+            }
+        }
+        /**
+         * 第二步：
+         * (1).求以该像素为中心，s为边长的正方形里面的像素的和的平均值；
+         * (2).比较当前像素与平均值的(1-t/100)倍的大小，大于则记录该像素点是二值化的背景，反之则记录为前景。
+         **/
+        for (int h = 0; h < height; h++) {
+            for (int w = 0; w < width; w++) {
+                int currentPixelGray = grayPixels[w + h * width] & 0x000000FF;
+                if (currentPixelGray > getSquarePixelsGrayMean(integralImageSumArr, w, h, s_len) * t_precent) {
+                    srcPixels[w + h * width] = 0x00FFFFFF;
+                }
+            }
+        }
+
+        Bitmap result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444);
+        result.setPixels(srcPixels, 0, width, 0, 0, width, height);
+        return result;
+
+    }
+
+    private static double getSquarePixelsGrayMean(long[][] integralImageSumArr, int w, int h, int s_len) {
+        /**
+         * 算法：
+         *
+         * 积分图:    像素灰度值：
+         * A--B--C    a--b--c
+         * |  |  |    |  |  |
+         * D--E--F    d--e--f
+         * |  |  |    |  |  |
+         * G--H--I    g--h--i
+         *那么，e + f + h + i = I - C - G + A
+         * */
+        int w_real = integralImageSumArr[0].length;
+        int h_real = integralImageSumArr.length;
+        //求出正方形四个顶点的索引，正方形操作像素边界的部分直接舍弃
+        int w_index_left = (w - s_len - 1 < 0 ? 0 : w - s_len - 1);
+        int w_index_right = (w + s_len + 1 > w_real - 1 ? w_real - 1 : w + s_len + 1);
+        int h_index_top = (h - s_len - 1 < 0 ? 0 : h - s_len - 1);
+        int h_index_bottom = (h + s_len + 1 > h_real - 1 ? h_real - 1 : h + s_len + 1);
+
+        int grayNum = 0;
+        long graySum = 0;
+
+        long I = integralImageSumArr[h_index_bottom][w_index_right];
+        long C = (h_index_top == 0 ? 0 : integralImageSumArr[h_index_top - 1][w_index_right]);
+        long G = (w_index_left == 0 ? 0 : integralImageSumArr[h_index_bottom][w_index_left - 1]);
+        long A;
+        if (h_index_top == 0 && w_index_left != 0) {
+            A = integralImageSumArr[0][w_index_left - 1];
+        } else if (h_index_top != 0 && w_index_left == 0) {
+            A = integralImageSumArr[h_index_top - 1][0];
+        } else if (h_index_top == 0 && w_index_left == 0) {
+            A = integralImageSumArr[0][0];
+        } else {
+            A = integralImageSumArr[h_index_top - 1][w_index_left - 1];
+        }
+        graySum = I - C - G + A;
+        grayNum = (h_index_bottom - h_index_top + 1) * (w_index_right - w_index_left + 1);
+        return (double) graySum / grayNum;
+
+    }
 
 }

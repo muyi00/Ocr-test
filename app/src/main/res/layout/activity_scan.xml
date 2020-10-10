@@ -24,10 +24,10 @@
             android:orientation="vertical">
 
             <CheckBox
-                android:id="@+id/binarization_cb"
+                android:id="@+id/processing_cb"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="图片二值化" />
+                android:text="图片处理" />
 
             <TextView
                 android:id="@+id/tv_result"
