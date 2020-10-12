@@ -29,7 +29,7 @@ class Utils {
         try {
             YuvImage image = new YuvImage(nv21, ImageFormat.NV21, width, height, null);
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            image.compressToJpeg(new Rect(0, 0, width, height), 80, stream);
+            image.compressToJpeg(new Rect(0, 0, width, height), 100, stream);
             bitmap = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size());
             stream.close();
         } catch (Exception e) {

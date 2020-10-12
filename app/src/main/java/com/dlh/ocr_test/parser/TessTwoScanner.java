@@ -4,11 +4,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Environment;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.dlh.lib.IScanner;
 import com.dlh.lib.NV21;
 import com.dlh.lib.Result;
 import com.dlh.ocr_test.ProcessingImageUtils;
+import com.dlh.ocr_test.TesseractUtil;
 import com.dlh.ocr_test.baidu.FileUtil;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
@@ -22,7 +24,7 @@ import org.opencv.imgproc.Imgproc;
  */
 public class TessTwoScanner implements IScanner {
 
-    private static final String TAG = "TessTwo";
+    private static final String TAG = "TessTwoScanner";
     private NV21 nv21;
     private boolean isProcessing = false;
     private TessBaseAPI baseApi;
@@ -33,6 +35,7 @@ public class TessTwoScanner implements IScanner {
     private String filePath;
 
     public TessTwoScanner(Context context) {
+        Log.i(TAG, "TessTwo 初始化");
         filePath = FileUtil.getSaveFile(context).getAbsolutePath();
         nv21 = new NV21(context);
         baseApi = new TessBaseAPI();
@@ -51,6 +54,7 @@ public class TessTwoScanner implements IScanner {
     public Result scan(byte[] data, int width, int height) throws Exception {
         Bitmap bitmap = nv21.nv21ToBitmap(data, width, height);
         if (isProcessing) {
+            Log.i(TAG, "开始处理图片");
             Mat src = new Mat();
             org.opencv.android.Utils.bitmapToMat(bitmap, src);
             //1.转化成灰度图
@@ -63,14 +67,23 @@ public class TessTwoScanner implements IScanner {
             src = ProcessingImageUtils.medianBlur(src);
             //二值化
             //src = ProcessingImageUtils.threshold(src);
-            Imgproc.threshold(src, src, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+            Imgproc.threshold(src, src, 100, 255, Imgproc.THRESH_BINARY_INV | Imgproc.THRESH_MASK);
+
             org.opencv.android.Utils.matToBitmap(src, bitmap);
             // 释放内存
             src.release();
+            Log.i(TAG, "处理图片完成");
         }
+
+        if (bitmap == null) {
+            return null;
+        }
+
+        Log.i(TAG, "开始识别图片");
         baseApi.setImage(bitmap);
         String str = baseApi.getUTF8Text();
         if (!TextUtils.isEmpty(str)) {
+            Log.i(TAG, "识别成功");
             Result result = new Result();
             result.type = Result.TYPE_IMAGE;
             result.bitmap = bitmap;

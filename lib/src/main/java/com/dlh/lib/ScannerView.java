@@ -18,8 +18,6 @@ import java.util.List;
 
 /**
  * 扫描页面
- *
- *
  */
 public class ScannerView extends FrameLayout implements Camera.PreviewCallback, CameraPreview.FocusAreaSetter {
 
@@ -63,7 +61,7 @@ public class ScannerView extends FrameLayout implements Camera.PreviewCallback, 
         try {
             int previewWidth = previewSize[0];
             int previewHeight = previewSize[1];
-            int  rotationCount = getRotationCount();
+            int rotationCount = getRotationCount();
             boolean isRotated = rotationCount == 1 || rotationCount == 3;
             //根据预览页面尺寸和preview的尺寸之比，缩放扫码区域
             Rect rect = getScaledRect(previewWidth, previewHeight);
@@ -99,18 +97,22 @@ public class ScannerView extends FrameLayout implements Camera.PreviewCallback, 
             if (scanner != null && result == null) {
                 try {
                     result = scanner.scan(tempData, width, height);
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
                 if (result == null && isRotateDegree90Recognition) {
                     try {
                         result = scanner.scan(tempData2, width2, height2);
-                    } catch (Exception e) {}
+                    } catch (Exception e) {
+                    }
                 }
             }
             final Result result1 = result;
             post(new Runnable() {//切换到主线程
                 @Override
                 public void run() {
-                    if (callback != null) callback.result(result1);
+                    if (callback != null) {
+                        callback.result(result1);
+                    }
                 }
             });
         } catch (Exception e) {
@@ -168,7 +170,8 @@ public class ScannerView extends FrameLayout implements Camera.PreviewCallback, 
             }
             parameters.setFocusAreas(focusAreas);
             cameraWrapper.camera.setParameters(parameters);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
     }
 
     // ******************************************************************************
@@ -204,7 +207,6 @@ public class ScannerView extends FrameLayout implements Camera.PreviewCallback, 
 
     /**
      * 开启扫描
-     *
      */
     public void onResume() {
         startCamera();
@@ -212,7 +214,6 @@ public class ScannerView extends FrameLayout implements Camera.PreviewCallback, 
 
     /**
      * 停止扫描
-     *
      */
     public void onPause() {
         stopCamera();
@@ -265,7 +266,8 @@ public class ScannerView extends FrameLayout implements Camera.PreviewCallback, 
      * 闪光灯是否被点亮
      */
     public boolean isFlashOn() {
-        if (cameraWrapper == null || !CameraUtils.isFlashSupported(cameraWrapper.camera)) return false;
+        if (cameraWrapper == null || !CameraUtils.isFlashSupported(cameraWrapper.camera))
+            return false;
         Camera.Parameters parameters = cameraWrapper.camera.getParameters();
         return TextUtils.equals(parameters.getFlashMode(), Camera.Parameters.FLASH_MODE_TORCH);
     }
@@ -318,10 +320,10 @@ public class ScannerView extends FrameLayout implements Camera.PreviewCallback, 
         if (cameraWrapper != null) {
             try {
                 cameraWrapper.camera.setOneShotPreviewCallback(this);
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
     }
-
 
 
     void setCameraWrapper(CameraWrapper cameraWrapper) {
@@ -354,7 +356,8 @@ public class ScannerView extends FrameLayout implements Camera.PreviewCallback, 
             try {
                 cameraHandlerThread.quit();
                 cameraHandlerThread = null;
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
         if (cameraWrapper != null) {
             try {
@@ -362,7 +365,8 @@ public class ScannerView extends FrameLayout implements Camera.PreviewCallback, 
                 cameraPreview = null;
                 cameraWrapper.camera.release();//释放资源
                 cameraWrapper = null;
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
         previewSize = null;
         scaledRect = null;
@@ -384,7 +388,7 @@ public class ScannerView extends FrameLayout implements Camera.PreviewCallback, 
             int o = p.x == p.y ? 0 : p.x < p.y ? Configuration.ORIENTATION_PORTRAIT : Configuration.ORIENTATION_LANDSCAPE;
             float ratio = o == Configuration.ORIENTATION_PORTRAIT ? previewHeight * 1f / previewWidth : previewWidth * 1f / previewHeight;
             float r = w * 1f / h;
-            if (ratio < r){
+            if (ratio < r) {
                 int width = o == Configuration.ORIENTATION_PORTRAIT ? previewHeight : previewWidth;
                 scaledRect.left = scaledRect.left * width / w;
                 scaledRect.right = scaledRect.right * width / w;
@@ -418,7 +422,7 @@ public class ScannerView extends FrameLayout implements Camera.PreviewCallback, 
                 scaledRect.right = previewWidth - top;
                 scaledRect.bottom = right;
             }
-            if (scaledRect.left < 0)  scaledRect.left = 0;
+            if (scaledRect.left < 0) scaledRect.left = 0;
             if (scaledRect.top < 0) scaledRect.top = 0;
             if (scaledRect.right > previewWidth) scaledRect.right = previewWidth;
             if (scaledRect.bottom > previewHeight) scaledRect.bottom = previewHeight;
@@ -436,7 +440,6 @@ public class ScannerView extends FrameLayout implements Camera.PreviewCallback, 
 
     /**
      * 找到一个合适的previewSize（根据控件的尺寸）
-     *
      */
     void setOptimalPreviewSize() {
         if (previewSize != null || cameraWrapper == null) return;
@@ -468,14 +471,14 @@ public class ScannerView extends FrameLayout implements Camera.PreviewCallback, 
                     aspectTolerance = Math.abs(ratio - targetRatio);
                 }
             }
-            previewSize = new int[] {optimalSize.width, optimalSize.height};
+            previewSize = new int[]{optimalSize.width, optimalSize.height};
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
             DisplayMetrics dm = getContext().getResources().getDisplayMetrics();
-            int width = dm.widthPixels > dm.heightPixels ? dm.widthPixels : dm.heightPixels;	// 屏幕宽度
-            int height = dm.widthPixels > dm.heightPixels ? dm.heightPixels : dm.widthPixels;	// 屏幕高度
+            int width = dm.widthPixels > dm.heightPixels ? dm.widthPixels : dm.heightPixels;    // 屏幕宽度
+            int height = dm.widthPixels > dm.heightPixels ? dm.heightPixels : dm.widthPixels;    // 屏幕高度
             if (w * 1.0f / h <= 1.0f)
-            previewSize = w * 1.0f / h > 1.0f ? new int[] {width , height} : new int[] {height, height};
+                previewSize = w * 1.0f / h > 1.0f ? new int[]{width, height} : new int[]{height, height};
         }
     }
 }

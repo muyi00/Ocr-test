@@ -3,8 +3,10 @@ package com.dlh.ocr_test;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.text.TextUtils;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -21,7 +23,7 @@ public class ScanActivity extends AppCompatActivity {
     private ScannerView scannerView;
     private Vibrator vibrator;
     private TextView tvResult;
-    private ImageView image;
+    private ImageView image, image1;
     private CheckBox processing_cb;
     private TessTwoScanner tessTwoScanner;
 
@@ -31,6 +33,7 @@ public class ScanActivity extends AppCompatActivity {
         setContentView(R.layout.activity_scan);
         scannerView = findViewById(R.id.sv);
         tvResult = findViewById(R.id.tv_result);
+        image1 = findViewById(R.id.image1);
         image = findViewById(R.id.image);
         processing_cb = findViewById(R.id.processing_cb);
 
@@ -45,10 +48,12 @@ public class ScanActivity extends AppCompatActivity {
             @Override
             public void result(Result result) {
                 if (result != null) {
-                    tvResult.setText("识别结果：\n" + result.toString());
                     Glide.with(ScanActivity.this)
                             .load(result.bitmap)
                             .into(image);
+                    if (!TextUtils.isEmpty(result.data)) {
+                        tvResult.setText("识别结果：\n" + result.toString());
+                    }
                     startVibrator();
                 }
                 scannerView.restartPreviewAfterDelay(2000);

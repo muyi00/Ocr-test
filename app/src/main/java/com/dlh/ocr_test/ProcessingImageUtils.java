@@ -419,6 +419,15 @@ public class ProcessingImageUtils {
     }
 
 
+    public static Bitmap matToBitmap(Mat src){
+        Bitmap processedImage = Bitmap.createBitmap(src.cols(), src.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(src, processedImage);
+        return processedImage;
+    }
+
+
+
+
     /**
      * 　Sobel滤波器
      * <p>
@@ -706,7 +715,6 @@ public class ProcessingImageUtils {
         }
         return textMats;
     }
-
 
     /**
      * Wellner自适应阈值算法的二维扩展

@@ -205,14 +205,21 @@ public class TesseractActivity extends AppCompatActivity {
         if (src.empty()) {
             return;
         }
-
-        Mat dst =   ProcessingImageUtils.deSkewText(ProcessingImageUtils.rotateLeft(src));
+        //1.转化成灰度图
+        src = ProcessingImageUtils.gray(src);
+        //均值滤波
+        src = ProcessingImageUtils.blur(src);
+        //高斯滤波
+        src = ProcessingImageUtils.gaussianBlur(src);
+        //中值滤波
+        src = ProcessingImageUtils.medianBlur(src);
+        //二值化
+        src = ProcessingImageUtils.threshold(src);
 
         // 转换为Bitmap，显示
-        Bitmap bm = Bitmap.createBitmap(dst.cols(), dst.rows(), Bitmap.Config.ARGB_8888);
-        org.opencv.android.Utils.matToBitmap(dst, bm);
+        Bitmap bm = Bitmap.createBitmap(src.cols(), src.rows(), Bitmap.Config.ARGB_8888);
+        org.opencv.android.Utils.matToBitmap(src, bm);
         // 释放内存
-        dst.release();
         src.release();
         imageView2.setImageBitmap(bm);
         baseApi.setImage(bm);
