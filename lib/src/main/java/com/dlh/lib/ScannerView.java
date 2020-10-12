@@ -2,6 +2,7 @@ package com.dlh.lib;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.Camera;
@@ -186,6 +187,7 @@ public class ScannerView extends FrameLayout implements Camera.PreviewCallback, 
     public void setCallback(Callback callback) {
         this.callback = callback;
     }
+
 
     /**
      * 扫描区域

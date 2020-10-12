@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -16,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.bumptech.glide.Glide;
+import com.dlh.lib.ImageInfo;
 import com.dlh.ocr_test.adapter.CommonAdapter;
 import com.dlh.ocr_test.adapter.ViewHolder;
 import com.dlh.ocr_test.permissions.PermissionGroupUtil;
@@ -27,7 +27,6 @@ import com.zhihu.matisse.internal.entity.CaptureStrategy;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;

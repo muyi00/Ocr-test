@@ -7,15 +7,17 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.dlh.lib.IScanner;
+import com.dlh.lib.ImageInfo;
 import com.dlh.lib.NV21;
 import com.dlh.lib.Result;
 import com.dlh.ocr_test.ProcessingImageUtils;
-import com.dlh.ocr_test.TesseractUtil;
 import com.dlh.ocr_test.baidu.FileUtil;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
 import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * desc   :
@@ -33,6 +35,7 @@ public class TessTwoScanner implements IScanner {
     //识别语言英文
     static final String DEFAULT_LANGUAGE = "eng";//"chi_sim";//
     private String filePath;
+    List<ImageInfo> imageInfos = new ArrayList<>();
 
     public TessTwoScanner(Context context) {
         Log.i(TAG, "TessTwo 初始化");
@@ -53,27 +56,33 @@ public class TessTwoScanner implements IScanner {
     @Override
     public Result scan(byte[] data, int width, int height) throws Exception {
         Bitmap bitmap = nv21.nv21ToBitmap(data, width, height);
-        if (isProcessing) {
-            Log.i(TAG, "开始处理图片");
-            Mat src = new Mat();
-            org.opencv.android.Utils.bitmapToMat(bitmap, src);
-            //1.转化成灰度图
-            src = ProcessingImageUtils.gray(src);
-            //均值滤波
-            src = ProcessingImageUtils.blur(src);
-            //高斯滤波
-            src = ProcessingImageUtils.gaussianBlur(src);
-            //中值滤波
-            src = ProcessingImageUtils.medianBlur(src);
-            //二值化
-            //src = ProcessingImageUtils.threshold(src);
-            Imgproc.threshold(src, src, 100, 255, Imgproc.THRESH_BINARY_INV | Imgproc.THRESH_MASK);
+        imageInfos.clear();
+        Log.i(TAG, "开始处理图片");
+        Mat src = new Mat();
+        org.opencv.android.Utils.bitmapToMat(bitmap, src);
+        addShowBitmap("原始图片", src);
+        //1.转化成灰度图
+        src = ProcessingImageUtils.gray(src);
+        addShowBitmap("灰度图", src);
+        //均值滤波
+        src = ProcessingImageUtils.blur(src);
+        addShowBitmap("均值滤波", src);
+        //高斯滤波
+        src = ProcessingImageUtils.gaussianBlur(src);
+        addShowBitmap("高斯滤波", src);
+        //中值滤波
+        src = ProcessingImageUtils.medianBlur(src);
+        addShowBitmap("中值滤波", src);
+        //二值化
+        src = ProcessingImageUtils.threshold(src);
+        addShowBitmap("二值化", src);
+        //Imgproc.threshold(src, src, 100, 255, Imgproc.THRESH_BINARY_INV | Imgproc.THRESH_MASK);
 
-            org.opencv.android.Utils.matToBitmap(src, bitmap);
-            // 释放内存
-            src.release();
-            Log.i(TAG, "处理图片完成");
-        }
+        org.opencv.android.Utils.matToBitmap(src, bitmap);
+        // 释放内存
+        src.release();
+        Log.i(TAG, "处理图片完成");
+
 
         if (bitmap == null) {
             return null;
@@ -86,15 +95,21 @@ public class TessTwoScanner implements IScanner {
             Log.i(TAG, "识别成功");
             Result result = new Result();
             result.type = Result.TYPE_IMAGE;
-            result.bitmap = bitmap;
+            result.imageInfos = imageInfos;
             result.data = baseApi.getUTF8Text().trim();
             return result;
         }
         return null;
     }
 
+    private void addShowBitmap(String title, Mat src) {
+        Bitmap bitmap = Bitmap.createBitmap(src.cols(), src.rows(), Bitmap.Config.RGB_565);
+        org.opencv.android.Utils.matToBitmap(src, bitmap);
 
-    public void setProcessing(boolean processing) {
-        isProcessing = processing;
+        ImageInfo imageInfo = new ImageInfo();
+        imageInfo.title = title;
+        imageInfo.bitmap = bitmap;
+        imageInfos.add(0, imageInfo);
+
     }
 }
