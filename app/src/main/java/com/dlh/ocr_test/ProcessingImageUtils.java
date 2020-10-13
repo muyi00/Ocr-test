@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
+ * https://blog.csdn.net/lj501886285/article/details/52425157
  * desc   : 处理图片工具
  * 参考：https://www.cnblogs.com/xunzhi/p/9131962.html
  * 参考：https://github.com/kmin0579/CharDetect/blob/master/CharDetect/src/com/kmin/CharDetect/DetectChar.java

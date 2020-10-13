@@ -2,7 +2,6 @@ package com.dlh.lib;
 
 /**
  * 自定义识别接口
- *
  */
 public interface IScanner {
 
