@@ -3,29 +3,38 @@ package com.dlh.ocr_test;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.text.TextUtils;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.dlh.lib.Callback;
+import com.dlh.lib.ImageInfo;
 import com.dlh.lib.Result;
 import com.dlh.lib.ScannerView;
+import com.dlh.ocr_test.adapter.CommonAdapter;
+import com.dlh.ocr_test.adapter.ViewHolder;
 import com.dlh.ocr_test.parser.TessTwoScanner;
+
+import java.util.ArrayList;
+
 
 public class ScanActivity extends AppCompatActivity {
 
     private ScannerView scannerView;
     private Vibrator vibrator;
     private TextView tvResult;
-    private ImageView image, image1;
-    private CheckBox processing_cb;
+    private Button start_btn;
     private TessTwoScanner tessTwoScanner;
+
+    private ArrayList<ImageInfo> imageInfos = new ArrayList<ImageInfo>();
+    private CommonAdapter<ImageInfo> adapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,9 +42,19 @@ public class ScanActivity extends AppCompatActivity {
         setContentView(R.layout.activity_scan);
         scannerView = findViewById(R.id.sv);
         tvResult = findViewById(R.id.tv_result);
-        image1 = findViewById(R.id.image1);
-        image = findViewById(R.id.image);
-        processing_cb = findViewById(R.id.processing_cb);
+        start_btn = findViewById(R.id.start_btn);
+        start_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (start_btn.getText().toString().equals("停止")) {
+                    scannerView.onPause();
+                    start_btn.setText("开始");
+                } else {
+                    scannerView.onResume();
+                    start_btn.setText("停止");
+                }
+            }
+        });
 
         tessTwoScanner = new TessTwoScanner(ScanActivity.this);
 
@@ -48,9 +67,9 @@ public class ScanActivity extends AppCompatActivity {
             @Override
             public void result(Result result) {
                 if (result != null) {
-                    Glide.with(ScanActivity.this)
-                            .load(result.bitmap)
-                            .into(image);
+                    imageInfos.clear();
+                    imageInfos.addAll(result.imageInfos);
+                    adapter.notifyDataSetChanged();
                     if (!TextUtils.isEmpty(result.data)) {
                         tvResult.setText("识别结果：\n" + result.toString());
                     }
@@ -60,12 +79,18 @@ public class ScanActivity extends AppCompatActivity {
             }
         });
 
-        processing_cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        adapter = new CommonAdapter<ImageInfo>(this, imageInfos, R.layout.item_bitmap_info) {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                tessTwoScanner.setProcessing(isChecked);
+            public void convert(ViewHolder helper, int position, ImageInfo item) {
+                helper.setText(R.id.title, item.title);
+                ImageView image = helper.getView(R.id.image);
+                Glide.with(ScanActivity.this)
+                        .load(item.bitmap)
+                        .into(image);
             }
-        });
+        };
+        ListView bitmap_lv = findViewById(R.id.bitmap_lv);
+        bitmap_lv.setAdapter(adapter);
     }
 
 

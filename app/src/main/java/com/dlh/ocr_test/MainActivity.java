@@ -2,7 +2,9 @@ package com.dlh.ocr_test;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,6 +13,8 @@ import android.widget.Toast;
 import com.dlh.ocr_test.baidu.BaiduOcrActivity;
 import com.dlh.ocr_test.permissions.PermissionGroupUtil;
 import com.dlh.ocr_test.permissions.PermissionUtil;
+import com.dlh.ocr_test.utils.AsyncTaskUtil;
+import com.dlh.ocr_test.utils.CopyFileFromAssets;
 
 import org.opencv.android.OpenCVLoader;
 
@@ -21,13 +25,26 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private PermissionUtil permissionUtil;
+    private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mContext = this;
         permissionUtil = new PermissionUtil(this);
         iniLoadOpenCV();
+        permissionUtil.checkPermision(PermissionGroupUtil.cameraPermissions, new PermissionUtil.RequestPermissionCallback() {
+            @Override
+            public void onSuccessful(List<String> permissions) {
+                loadTessTwoFileData();
+            }
+
+            @Override
+            public void onFailure(List<String> permissions) {
+
+            }
+        });
     }
 
     private void iniLoadOpenCV() {
@@ -37,6 +54,21 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Opencv 未加载", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void loadTessTwoFileData() {
+        //tessdata
+        new AsyncTaskUtil(this, new AsyncTaskUtil.AsyncCallBack() {
+            @Override
+            public int asyncProcess() throws InterruptedException {
+                CopyFileFromAssets.copyTessTwoData(mContext);
+                return 0;
+            }
+
+            @Override
+            public void postUI(int rsult) {
+            }
+        }).setMaskContent("正在初始化").executeTask();
     }
 
     @Override
@@ -74,9 +106,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
-
-
 
 
     public void tesseractOcrBtn(View view) {

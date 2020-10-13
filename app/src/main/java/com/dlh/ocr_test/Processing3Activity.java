@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.bumptech.glide.Glide;
+import com.dlh.lib.ImageInfo;
 import com.dlh.ocr_test.adapter.CommonAdapter;
 import com.dlh.ocr_test.adapter.ViewHolder;
 import com.dlh.ocr_test.permissions.PermissionGroupUtil;

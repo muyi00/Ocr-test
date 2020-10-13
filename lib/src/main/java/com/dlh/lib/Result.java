@@ -3,6 +3,9 @@ package com.dlh.lib;
 import android.graphics.Bitmap;
 import android.os.Build;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 识别结果
  */
@@ -29,8 +32,8 @@ public class Result {
     public String path;
     // 数据
     public String data;
-    //解析成功的图片
-    public Bitmap bitmap;
+    //图片
+    public List<ImageInfo> imageInfos = new ArrayList<>();
 
     // 以下是对data的说明
     // 当type为TYPE_CODE，TYPE_BANK_CARD，TYPE_LICENSE_PLATE时，data为字符串
@@ -70,8 +73,7 @@ public class Result {
         else if (type == TYPE_BANK_CARD) sb.append("银行卡");
         else if (type == TYPE_LICENSE_PLATE) sb.append("车牌");
         else if (type == TYPE_DRIVING_LICENSE) sb.append("驾驶证");
-        else if (type == TYPE_IMAGE)
-            sb.append(String.format("图片,w：%s h:%s", bitmap.getWidth(), bitmap.getHeight()));
+        else if (type == TYPE_IMAGE) sb.append("图片");
         else sb.append("未知类型（").append(type).append("）");
         sb.append("\n").append(data);
         return sb.toString();

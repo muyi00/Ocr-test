@@ -17,8 +17,8 @@ import com.dlh.lib.IViewFinder;
  */
 public class ViewFinder extends View implements IViewFinder {
     private Rect framingRect;//扫码框所占区域
-    private float widthRatio = 0.8f;//扫码框宽度占view总宽度的比例
-    private float heightRatio = 0.2f;
+    private float widthRatio = 1f;//扫码框宽度占view总宽度的比例
+    private float heightRatio = 0.3f;
     private float heightWidthRatio = 0.5626f;//扫码框的高宽比
     private int leftOffset = -1;//扫码框相对于左边的偏移量，若为负值，则扫码框会水平居中
     private int topOffset = -1;//扫码框相对于顶部的偏移量，若为负值，则扫码框会竖直居中

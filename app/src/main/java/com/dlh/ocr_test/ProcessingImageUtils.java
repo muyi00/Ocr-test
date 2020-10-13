@@ -1,6 +1,7 @@
 package com.dlh.ocr_test;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.util.Log;
 
 import org.opencv.android.Utils;
@@ -33,6 +34,7 @@ import java.util.Random;
  * tesseract ocr -训练样本库  https://www.jianshu.com/p/55d2d26fa2ff
  * <p>
  * <p>
+ * https://www.jianshu.com/p/232b6468f80a?utm_campaign=maleskine&utm_content=note&utm_medium=seo_notes&utm_source=recommendation
  * https://blog.csdn.net/qq_20158897/category_9325824.html
  * author : YJ
  * time   : 2020/9/28 11:44
@@ -258,9 +260,32 @@ public class ProcessingImageUtils {
          * THRESH_TRIANGLE	    16	三角形法自动寻求全局阈值
          */
         //Imgproc.threshold(src, binary, 0, 255, Imgproc.THRESH_BINARY_INV | Imgproc.THRESH_OTSU);
-        Imgproc.threshold(src, binary, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_TRIANGLE);
+        Imgproc.threshold(src, binary, 100, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
         //反转数组的每一位。
         //Core.bitwise_not(binary, binary);
+        return binary;
+    }
+
+    public static Mat adaptiveThreshold(Mat src, int blockSize, double c) {
+        Mat binary = new Mat();
+        /***
+         * 参数一：src，待二值化的图像，图像只能是CV_8UC1数据类型
+         * 参数二：dst，二值化后的图像，与输入图像具有相同的尺寸、类型
+         * 参数三：maxValue，二值化的最大值
+         * 参数四：adaptiveMethod，自适应阈值算法，分为均值法ADAPTIVE_THRESH_MEAN_C和高斯法ADAPTIVE_THRESH_GAUSSIAN_C这两种。
+         * 参数五：thresholdType，选择图像二值化方法的标志，只能是THRESH_BINARY和THRESH_BINARY_INV
+         * 参数六：blockSize，自适应确定阈值的像素邻域大小，一般为3，5，7的奇数
+         * 参数七：C，从平均值或者加权平均值中减去的常数，可以为正，也可以为负
+         */
+        Imgproc.adaptiveThreshold(
+                src,
+                binary,
+                255,
+                Imgproc.ADAPTIVE_THRESH_MEAN_C,
+                Imgproc.THRESH_BINARY,
+                blockSize,
+                c
+        );
         return binary;
     }
 
@@ -419,13 +444,11 @@ public class ProcessingImageUtils {
     }
 
 
-    public static Bitmap matToBitmap(Mat src){
+    public static Bitmap matToBitmap(Mat src) {
         Bitmap processedImage = Bitmap.createBitmap(src.cols(), src.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(src, processedImage);
         return processedImage;
     }
-
-
 
 
     /**
@@ -817,5 +840,103 @@ public class ProcessingImageUtils {
         return (double) graySum / grayNum;
 
     }
+
+
+    public static Bitmap binarization(Bitmap img) {
+        int width = img.getWidth();
+        int height = img.getHeight();
+        int area = width * height;
+        int gray[][] = new int[width][height];
+        int average = 0;// 灰度平均值
+        int graysum = 0;
+        int graymean = 0;
+        int grayfrontmean = 0;
+        int graybackmean = 0;
+        int pixelGray;
+        int front = 0;
+        int back = 0;
+        int[] pix = new int[width * height];
+        img.getPixels(pix, 0, width, 0, 0, width, height);
+        for (int i = 1; i < width; i++) { // 不算边界行和列，为避免越界
+            for (int j = 1; j < height; j++) {
+                int x = j * width + i;
+                int r = (pix[x] >> 16) & 0xff;
+                int g = (pix[x] >> 8) & 0xff;
+                int b = pix[x] & 0xff;
+                pixelGray = (int) (0.3 * r + 0.59 * g + 0.11 * b);// 计算每个坐标点的灰度
+                gray[i][j] = (pixelGray << 16) + (pixelGray << 8) + (pixelGray);
+                graysum += pixelGray;
+            }
+        }
+        graymean = (int) (graysum / area);// 整个图的灰度平均值
+        average = graymean;
+        Log.i(TAG, "Average:" + average);
+        for (int i = 0; i < width; i++) // 计算整个图的二值化阈值
+        {
+            for (int j = 0; j < height; j++) {
+                if (((gray[i][j]) & (0x0000ff)) < graymean) {
+                    graybackmean += ((gray[i][j]) & (0x0000ff));
+                    back++;
+                } else {
+                    grayfrontmean += ((gray[i][j]) & (0x0000ff));
+                    front++;
+                }
+            }
+        }
+        int frontvalue = (int) (grayfrontmean / front);// 前景中心
+        int backvalue = (int) (graybackmean / back);// 背景中心
+        float G[] = new float[frontvalue - backvalue + 1];// 方差数组
+        int s = 0;
+        Log.i(TAG, "Front:" + front + "**Frontvalue:" + frontvalue + "**Backvalue:" + backvalue);
+        for (int i1 = backvalue; i1 < frontvalue + 1; i1++)// 以前景中心和背景中心为区间采用大津法算法（OTSU算法）
+        {
+            back = 0;
+            front = 0;
+            grayfrontmean = 0;
+            graybackmean = 0;
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    if (((gray[i][j]) & (0x0000ff)) < (i1 + 1)) {
+                        graybackmean += ((gray[i][j]) & (0x0000ff));
+                        back++;
+                    } else {
+                        grayfrontmean += ((gray[i][j]) & (0x0000ff));
+                        front++;
+                    }
+                }
+            }
+            grayfrontmean = (int) (grayfrontmean / front);
+            graybackmean = (int) (graybackmean / back);
+            G[s] = (((float) back / area) * (graybackmean - average)
+                    * (graybackmean - average) + ((float) front / area)
+                    * (grayfrontmean - average) * (grayfrontmean - average));
+            s++;
+        }
+        float max = G[0];
+        int index = 0;
+        for (int i = 1; i < frontvalue - backvalue + 1; i++) {
+            if (max < G[i]) {
+                max = G[i];
+                index = i;
+            }
+        }
+
+
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                int in = j * width + i;
+                if (((gray[i][j]) & (0x0000ff)) < (index + backvalue)) {
+                    pix[in] = Color.rgb(0, 0, 0);
+                } else {
+                    pix[in] = Color.rgb(255, 255, 255);
+                }
+            }
+        }
+
+        Bitmap temp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        temp.setPixels(pix, 0, width, 0, 0, width, height);
+        return temp;
+    }
+
 
 }

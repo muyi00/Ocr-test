@@ -15,15 +15,16 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="tesseractOcrBtn"
-        android:text="Tesseract图片识别" />
+        android:onClick="ocrBtn"
+        android:text="Tesseract自动识别" />
 
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="ocrBtn"
-        android:text="图片识别" />
+        android:onClick="tesseractOcrBtn"
+        android:text="Tesseract拍照识别" />
+
 
     <Button
         android:layout_width="match_parent"

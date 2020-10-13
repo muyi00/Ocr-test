@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.bumptech.glide.Glide;
+import com.dlh.lib.ImageInfo;
 import com.dlh.ocr_test.adapter.CommonAdapter;
 import com.dlh.ocr_test.adapter.ViewHolder;
 import com.dlh.ocr_test.permissions.PermissionGroupUtil;
@@ -25,6 +26,7 @@ import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.internal.entity.CaptureStrategy;
 
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -172,6 +174,7 @@ public class ProcessingActivity extends AppCompatActivity {
         if (left_rotation_cb.isChecked()) {
             src = ProcessingImageUtils.rotateLeft(src);
         }
+        Core.multiply(src, new Scalar(2, 2, 2), src);
         //1.转化成灰度图
         src = ProcessingImageUtils.gray(src);
         addShowBitmap("灰度图", src);
@@ -183,13 +186,12 @@ public class ProcessingActivity extends AppCompatActivity {
         src = ProcessingImageUtils.medianBlur(src);
         //二值化
         src = ProcessingImageUtils.threshold(src);
-
         Mat historyMat = src.clone();
         addShowBitmap("二值化", src);
 
-        Mat kernel = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(17, 17));
-        Imgproc.erode(src, src, kernel);
-        addShowBitmap("二值化-腐蚀", src);
+        Mat kernel = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(3, 3));
+        Imgproc.dilate(src, src, kernel);
+        addShowBitmap("膨胀", src);
 
         //1.Sobel算子，x方向求梯度
         Mat sobel = new Mat();
