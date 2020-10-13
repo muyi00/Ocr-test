@@ -817,34 +817,4 @@ public class ProcessingImageUtils {
 
     }
 
-
-//    private Mat thresholdAdapt(Mat img, float rate) {
-//        int hh = img.rows();
-//        int ww = img.cols();
-//        Mat ret = img.clone();
-//        int height = (int) Math.sqrt(hh / ww * (hh + ww));
-//        int width = ww / hh * height;
-//        for (int h = 0; h < hh; h++) {
-//            for (int w = 0; w < ww; w++) {
-//                int h1 = Math.max(1, h - height / 2);
-//                int h2 = Math.max(1, h + height / 2);
-//                int w1 = Math.min(w - width / 2, hh);
-//                int w2 = Math.min(w + width / 2, ww);
-//
-//                float avg = 0;
-//                for (int i = h1; i < h2; i++) {
-//                    for (int j = w1; j < w2; j++) {
-//                        avg += *(img.data + i * ww + j);
-//                    }
-//                }
-//                *(ret.data + h * ww + w) = int(avg / ((h2 - h1) * (w2 - w1)));
-//            }
-//        }
-//        for (int i = 0; i < hh; i++) {
-//            uchar * pDst = ret.data + i * ww;
-//            for (int j = 0; j < ww; j++)
-//            *(pDst + j) = *(img.data + i * ww + j) < ( * (pDst + j) * rate)?0:255;
-//        }
-//        return ret;
-//    }
 }
