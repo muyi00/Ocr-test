@@ -172,71 +172,50 @@ public class ProcessingActivity extends AppCompatActivity {
         if (left_rotation_cb.isChecked()) {
             src = ProcessingImageUtils.rotateLeft(src);
         }
+
         Core.multiply(src, new Scalar(2, 2, 2), src);
         //1.转化成灰度图
         src = ProcessingImageUtils.gray(src);
-        addShowBitmap("灰度图", src);
-        //均值滤波
-        src = ProcessingImageUtils.blur(src);
-        //高斯滤波
+        addShowBitmap("灰度", src);
         src = ProcessingImageUtils.gaussianBlur(src);
-        //中值滤波
+        addShowBitmap("高斯", src);
         src = ProcessingImageUtils.medianBlur(src);
-        //二值化
-        src = ProcessingImageUtils.threshold(src);
-        Mat historyMat = src.clone();
+        src = ProcessingImageUtils.blur(src);
+//        src = ProcessingImageUtils.threshold(src);
+        src = ProcessingImageUtils.adaptiveThreshold(src, 7, 10);
         addShowBitmap("二值化", src);
+        Mat historyMat = src.clone();
 
-        Mat kernel = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(3, 3));
-        Imgproc.dilate(src, src, kernel);
-        addShowBitmap("膨胀", src);
+        Mat erodeKernel = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(3, 3));
+        Imgproc.erode(src, src, erodeKernel);
+        addShowBitmap("腐蚀", src);
 
-        //1.Sobel算子，x方向求梯度
-        Mat sobel = new Mat();
-        Imgproc.Sobel(src, sobel, CvType.CV_8U, 1, 0, 3);
-        //2.二值化
-        Mat binary = new Mat();
-        Imgproc.threshold(sobel, binary, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_TRIANGLE);
-        addShowBitmap("Sobel处理-二值化", binary);
-        //3.膨胀和腐蚀操作核设定
-        Mat element1 = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(80, 90));
-        //控制高度设置可以控制上下行的膨胀程度，例如3比4的区分能力更强,但也会造成漏检
-        Mat element2 = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(24, 4));
-        //4.膨胀一次，让轮廓突出
-        Mat dilate1 = new Mat();
-        Imgproc.dilate(binary, dilate1, element2);
-        addShowBitmap("sobel处理-第一次膨胀", dilate1);
-        //5.腐蚀一次，去掉细节，表格线等。这里去掉的是竖直的线
-        Mat erode1 = new Mat();
-        Imgproc.dilate(dilate1, erode1, element1);
-        addShowBitmap("sobel处理-腐蚀", erode1);
-        //6.再次膨胀，让轮廓明显一些
-        Mat dilate2 = new Mat();
-        Imgproc.dilate(erode1, dilate2, element2);
-        addShowBitmap("sobel处理-第二次膨胀", dilate2);
+
+//
+//        Mat element2 = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(60, 60));
+//        Mat dilate1 = new Mat();
+//        Imgproc.dilate(src, dilate1, element2);
+//        addShowBitmap("sobel处理-第一次膨胀", dilate1);
+//
         //3.查找和筛选文字区域
-        List<RotatedRect> rects = ProcessingImageUtils.findTextRegion(dilate2);
+        List<RotatedRect> rects = ProcessingImageUtils.findTextRegion(src);
 
         //4.用绿线画出这些找到的轮廓
         List<Mat> textMats = new LinkedList<>();
         try {
             for (RotatedRect rotatedRect : rects) {
                 Rect rect = rotatedRect.boundingRect();
-                Imgproc.rectangle(historyMat, rect.tl(), rect.br(), new Scalar(255, 0, 0, 255));
-                textMats.add(historyMat.submat(rect));
-
-                Point p[] = new Point[4];
-                rotatedRect.points(p);
-                for (int j = 0; j <= 3; j++) {
-                    Imgproc.line(src, p[j], p[(j + 1) % 4], new Scalar(0, 255, 0), 2);
+                if (rect.height < historyMat.height() / 6) {
+                    continue;
                 }
+                textMats.add(historyMat.submat(rect));
             }
         } catch (Exception ex) {
             System.out.println(ex.getLocalizedMessage());
         }
-
-        //将矩阵转换为图像
-        addShowBitmap("最终结果", src);
+//
+//        //将矩阵转换为图像
+//        addShowBitmap("最终结果", src);
         addShowBitmaps("内容截取", textMats);
         // 释放内存
         src.release();

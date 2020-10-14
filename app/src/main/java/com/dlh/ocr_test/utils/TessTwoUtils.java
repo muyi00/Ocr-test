@@ -15,7 +15,7 @@ public class TessTwoUtils {
     private Context context;
     private TessBaseAPI baseApi;
     //识别语言英文
-    static final String DEFAULT_LANGUAGE = "eng";//"chi_sim";//
+    static final String DEFAULT_LANGUAGE = "eng";//"chi_sim";//dlh
 
     public TessTwoUtils(Context context) {
         this.context = context;

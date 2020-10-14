@@ -22,6 +22,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import static org.opencv.core.CvType.CV_8UC1;
+
 /**
  * https://blog.csdn.net/lj501886285/article/details/52425157
  * desc   : 处理图片工具
@@ -37,6 +39,9 @@ import java.util.Random;
  * <p>
  * https://www.jianshu.com/p/232b6468f80a?utm_campaign=maleskine&utm_content=note&utm_medium=seo_notes&utm_source=recommendation
  * https://blog.csdn.net/qq_20158897/category_9325824.html
+ * <p>
+ * https://blog.csdn.net/qq_45769063/article/details/107102117#%E5%9B%9B%E3%80%81%E8%87%AA%E9%80%82%E5%BA%94%E9%98%88%E5%80%BC%E6%B3%95%EF%BC%88adaptiveThreshold%EF%BC%89%E2%80%94%E2%80%94%E5%B1%80%E9%83%A8%E9%98%88%E5%80%BC%E6%B3%95
+ * <p>
  * author : YJ
  * time   : 2020/9/28 11:44
  */
@@ -261,7 +266,7 @@ public class ProcessingImageUtils {
          * THRESH_TRIANGLE	    16	三角形法自动寻求全局阈值
          */
         //Imgproc.threshold(src, binary, 0, 255, Imgproc.THRESH_BINARY_INV | Imgproc.THRESH_OTSU);
-        Imgproc.threshold(src, binary, 100, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+        Imgproc.threshold(src, binary, 255, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
         //反转数组的每一位。
         //Core.bitwise_not(binary, binary);
         return binary;
@@ -273,8 +278,8 @@ public class ProcessingImageUtils {
          * 参数一：src，待二值化的图像，图像只能是CV_8UC1数据类型
          * 参数二：dst，二值化后的图像，与输入图像具有相同的尺寸、类型
          * 参数三：maxValue，二值化的最大值
-         * 参数四：adaptiveMethod，自适应阈值算法，分为均值法ADAPTIVE_THRESH_MEAN_C和高斯法ADAPTIVE_THRESH_GAUSSIAN_C这两种。
-         * 参数五：thresholdType，选择图像二值化方法的标志，只能是THRESH_BINARY和THRESH_BINARY_INV
+         * 参数四：adaptiveMethod，自适应阈值算法，分为均值法 ADAPTIVE_THRESH_MEAN_C 和高斯法 ADAPTIVE_THRESH_GAUSSIAN_C 这两种。
+         * 参数五：thresholdType，选择图像二值化方法的标志，只能是 THRESH_BINARY 和 THRESH_BINARY_INV
          * 参数六：blockSize，自适应确定阈值的像素邻域大小，一般为3，5，7的奇数
          * 参数七：C，从平均值或者加权平均值中减去的常数，可以为正，也可以为负
          */
@@ -282,7 +287,7 @@ public class ProcessingImageUtils {
                 src,
                 binary,
                 255,
-                Imgproc.ADAPTIVE_THRESH_MEAN_C,
+                Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
                 Imgproc.THRESH_BINARY,
                 blockSize,
                 c
@@ -324,7 +329,7 @@ public class ProcessingImageUtils {
     public static Mat medianBlur(Mat src) {
         Mat outMat = new Mat();
         // 中值模糊方法
-        Imgproc.medianBlur(src, outMat, 5);
+        Imgproc.medianBlur(src, outMat, 9);
         return outMat;
     }
 
@@ -938,6 +943,8 @@ public class ProcessingImageUtils {
         temp.setPixels(pix, 0, width, 0, 0, width, height);
         return temp;
     }
+
+
 
 
 }

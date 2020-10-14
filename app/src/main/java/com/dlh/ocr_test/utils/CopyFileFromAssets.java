@@ -31,6 +31,12 @@ public class CopyFileFromAssets {
         if (!chi_sim.exists()) {
             CopyFileFromAssets.copy(mContext, "chi_sim.traineddata", path, "chi_sim.traineddata");
         }
+
+        //dlh.traineddata
+        File dlh = new File(path, "dlh.traineddata");
+        if (!dlh.exists()) {
+            CopyFileFromAssets.copy(mContext, "dlh.traineddata", path, "dlh.traineddata");
+        }
     }
 
 
