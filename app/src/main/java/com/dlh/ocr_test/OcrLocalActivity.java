@@ -23,21 +23,20 @@ import com.dlh.lib.ScannerView;
 import com.dlh.ocr_test.adapter.CommonAdapter;
 import com.dlh.ocr_test.adapter.ViewHolder;
 import com.dlh.ocr_test.parser.TessTwoScanner;
-import com.dlh.ocr_test.parser.TessTwoScanner2;
 import com.dlh.ocr_test.parser.Utils;
 import com.dlh.ocr_test.utils.AsyncTaskUtil;
 
 import java.util.ArrayList;
 
+public class OcrLocalActivity extends AppCompatActivity {
 
-public class ScanActivity extends AppCompatActivity {
-    private static final String TAG = "ScanActivity";
+    private static final String TAG = "OcrLocalActivity";
 
     private ScannerView scannerView;
     private Vibrator vibrator;
     private TextView tvResult;
     private Button start_btn, save_btn;
-    private TessTwoScanner2 tessTwoScanner;
+    private TessTwoScanner tessTwoScanner;
     private CheckBox gaussianBlur_cb, medianBlur_cb, blur_cb, discern_0_cb;
 
     private ArrayList<ImageInfo> imageInfos = new ArrayList<ImageInfo>();
@@ -48,7 +47,7 @@ public class ScanActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_scan);
+        setContentView(R.layout.activity_ocr_local);
         scannerView = findViewById(R.id.sv);
         basePath = getExternalCacheDir().getAbsolutePath();
         gaussianBlur_cb = findViewById(R.id.gaussianBlur_cb);
@@ -104,7 +103,7 @@ public class ScanActivity extends AppCompatActivity {
             }
         });
 
-        tessTwoScanner = new TessTwoScanner2(ScanActivity.this);
+        tessTwoScanner = new TessTwoScanner(OcrLocalActivity.this);
 
         scannerView.setShouldAdjustFocusArea(true);
         scannerView.setViewFinder(new ViewFinder(this));
@@ -132,7 +131,7 @@ public class ScanActivity extends AppCompatActivity {
             public void convert(ViewHolder helper, int position, ImageInfo item) {
                 helper.setText(R.id.title, item.title);
                 ImageView image = helper.getView(R.id.image);
-                Glide.with(ScanActivity.this)
+                Glide.with(OcrLocalActivity.this)
                         .load(item.bitmap)
                         .into(image);
             }

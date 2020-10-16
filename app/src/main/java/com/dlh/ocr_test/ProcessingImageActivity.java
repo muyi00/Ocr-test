@@ -25,6 +25,7 @@ import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.internal.entity.CaptureStrategy;
 
 import org.opencv.android.Utils;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -316,6 +317,9 @@ public class ProcessingImageActivity extends AppCompatActivity {
         if (left_rotation_rb.isChecked()) {
             src = ProcessingImageUtils.rotateLeft(src);
         }
+
+        Core.multiply(src, new Scalar(2, 2, 2), src);
+
         //灰度
         if (gray_rb.isChecked()) {
             src = ProcessingImageUtils.gray(src);

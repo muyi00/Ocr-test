@@ -605,8 +605,10 @@ public class ProcessingImageUtils {
     public static Bitmap getPicturesDifferent(Mat mat1, Mat mat2) {
         Mat mat11 = new Mat();
         Core.subtract(mat1, mat2, mat11);
+
         Mat mat22 = new Mat();
         Core.subtract(mat2, mat1, mat22);
+
         Mat result = new Mat();
         Core.add(mat11, mat22, result);
         // 二值化处理
@@ -942,6 +944,25 @@ public class ProcessingImageUtils {
         Bitmap temp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         temp.setPixels(pix, 0, width, 0, 0, width, height);
         return temp;
+    }
+
+
+    public static Mat edgeDetectionXAndY(Mat mRgb) {
+        //"X和Y轴方向边缘检测"
+        Mat resultX = new Mat();
+        Imgproc.Sobel(mRgb, resultX, CvType.CV_16S, 2, 0, 1);
+        Core.convertScaleAbs(resultX, resultX);
+
+        Mat resultY = new Mat();
+        Imgproc.Sobel(mRgb, resultY, CvType.CV_16S, 0, 1, 3);
+        Core.convertScaleAbs(resultY, resultY);
+
+        Mat resultXY = new Mat();
+        Core.add(resultX, resultY, resultXY);
+
+        resultX.release();
+        resultY.release();
+        return resultXY;
     }
 
 

@@ -9,14 +9,27 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="baiduOcrBtn"
-        android:text="百度OCR文字识别" />
+        android:onClick="ocrLocalBtn"
+        android:text="本地扫描识别" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="ocrBtn"
-        android:text="Tesseract自动识别" />
+        android:onClick="ocrLocalBtn2"
+        android:text="本地扫描识别2" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="ocrBaiduBtn"
+        android:text="百度扫描识别" />
+
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="baiduOcrBtn"
+        android:text="百度OCR文字识别Demo" />
 
 
     <Button

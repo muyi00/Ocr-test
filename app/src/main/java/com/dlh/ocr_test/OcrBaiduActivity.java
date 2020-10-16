@@ -6,7 +6,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -22,62 +21,53 @@ import com.dlh.lib.Result;
 import com.dlh.lib.ScannerView;
 import com.dlh.ocr_test.adapter.CommonAdapter;
 import com.dlh.ocr_test.adapter.ViewHolder;
-import com.dlh.ocr_test.parser.TessTwoScanner;
-import com.dlh.ocr_test.parser.TessTwoScanner2;
+import com.dlh.ocr_test.parser.BaiduScanner;
 import com.dlh.ocr_test.parser.Utils;
 import com.dlh.ocr_test.utils.AsyncTaskUtil;
 
 import java.util.ArrayList;
 
+public class OcrBaiduActivity extends AppCompatActivity {
 
-public class ScanActivity extends AppCompatActivity {
-    private static final String TAG = "ScanActivity";
 
     private ScannerView scannerView;
     private Vibrator vibrator;
     private TextView tvResult;
     private Button start_btn, save_btn;
-    private TessTwoScanner2 tessTwoScanner;
-    private CheckBox gaussianBlur_cb, medianBlur_cb, blur_cb, discern_0_cb;
+    private BaiduScanner baiduScanner;
+    private CheckBox gaussianBlur_cb, medianBlur_cb, blur_cb;
 
     private ArrayList<ImageInfo> imageInfos = new ArrayList<ImageInfo>();
     private CommonAdapter<ImageInfo> adapter;
     private String basePath;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_scan);
+        setContentView(R.layout.activity_ocr_baidu);
+
         scannerView = findViewById(R.id.sv);
-        basePath = getExternalCacheDir().getAbsolutePath();
+        basePath = getFilesDir().getAbsolutePath();
         gaussianBlur_cb = findViewById(R.id.gaussianBlur_cb);
         medianBlur_cb = findViewById(R.id.medianBlur_cb);
         blur_cb = findViewById(R.id.blur_cb);
-        discern_0_cb = findViewById(R.id.discern_0_cb);
         gaussianBlur_cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                tessTwoScanner.isEnableGaussianBlur = isChecked;
+                baiduScanner.isEnableGaussianBlur = isChecked;
             }
         });
         medianBlur_cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                tessTwoScanner.isEnableMedianBlur = isChecked;
+                baiduScanner.isEnableMedianBlur = isChecked;
             }
         });
 
         blur_cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                tessTwoScanner.isEnableBlur = isChecked;
-            }
-        });
-        discern_0_cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                tessTwoScanner.isDiscern_0_Bitmap = isChecked;
+                baiduScanner.isEnableBlur = isChecked;
             }
         });
 
@@ -104,12 +94,12 @@ public class ScanActivity extends AppCompatActivity {
             }
         });
 
-        tessTwoScanner = new TessTwoScanner2(ScanActivity.this);
+        baiduScanner = new BaiduScanner(OcrBaiduActivity.this);
 
         scannerView.setShouldAdjustFocusArea(true);
         scannerView.setViewFinder(new ViewFinder(this));
         scannerView.setSaveBmp(false);
-        scannerView.setScanner(tessTwoScanner);
+        scannerView.setScanner(baiduScanner);
         scannerView.setRotateDegree90Recognition(true);
         scannerView.setCallback(new Callback() {
             @Override
@@ -132,7 +122,7 @@ public class ScanActivity extends AppCompatActivity {
             public void convert(ViewHolder helper, int position, ImageInfo item) {
                 helper.setText(R.id.title, item.title);
                 ImageView image = helper.getView(R.id.image);
-                Glide.with(ScanActivity.this)
+                Glide.with(OcrBaiduActivity.this)
                         .load(item.bitmap)
                         .into(image);
             }
@@ -173,12 +163,9 @@ public class ScanActivity extends AppCompatActivity {
         new AsyncTaskUtil(this, new AsyncTaskUtil.AsyncCallBack() {
             @Override
             public int asyncProcess() throws InterruptedException {
-                for (int i = 0; i < imageInfos.size(); i++) {
-                    ImageInfo info = imageInfos.get(i);
-                    String namePath = String.format("%s/%s.png", basePath, i);
-                    Log.d(TAG, namePath);
-                    Utils.saveBitmap(info.bitmap, namePath);
-                }
+                ImageInfo info = imageInfos.get(imageInfos.size() - 1);
+                String namePath = String.format("%s/%s.png", basePath, System.currentTimeMillis());
+                Utils.saveBitmap(info.bitmap, namePath);
                 return 0;
             }
 

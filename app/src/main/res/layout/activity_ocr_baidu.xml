@@ -29,12 +29,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="保存图片" />
-
-        <CheckBox
-            android:id="@+id/discern_0_cb"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="识别原图" />
     </LinearLayout>
 
     <LinearLayout
