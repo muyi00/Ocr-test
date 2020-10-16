@@ -343,11 +343,13 @@ public class ProcessingActivity extends AppCompatActivity {
 
     private void dispose2() {
 
+        //多边形大小
         Mat mat = Mat.zeros(600, 600, CvType.CV_8UC3);
+        //填充颜色
         mat.setTo(new Scalar(255, 255, 255));
 
+        //定点
         MatOfPoint matOfPoint = new MatOfPoint();
-
         List<Point> pointList = new ArrayList<>();
         pointList.add(new Point(50, 10));
         pointList.add(new Point(300, 12));
