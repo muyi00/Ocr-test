@@ -161,7 +161,7 @@ public class ProcessingActivity extends AppCompatActivity {
         new AsyncTaskUtil(this, new AsyncTaskUtil.AsyncCallBack() {
             @Override
             public int asyncProcess() throws InterruptedException {
-                dispose2();
+                dispose3();
                 return 0;
             }
 
@@ -278,34 +278,11 @@ public class ProcessingActivity extends AppCompatActivity {
                 continue;
             }
 
-            //多边形
-            MatOfPoint2f result = new MatOfPoint2f();
-            MatOfPoint2f source1 = new MatOfPoint2f();
-            source1.fromList(contours.get(i).toList());
-            Imgproc.approxPolyDP(source1, result, 4.0, true);
-            Point[] points = result.toArray();
-            int pointsSize = points.length;
-            for (int j = 0; j < pointsSize; j++) {
-                Imgproc.line(
-                        mSource3,
-                        points[j % pointsSize],
-                        points[(j + 1) % pointsSize],
-                        new Scalar(255.0, 255.0, 0.0),
-                        4,
-                        Imgproc.LINE_8
-                );
-            }
-
-//            Mat whiteMat = ProcessingImageUtils.createWhiteMat((int) (mSource2.rows() * 1.2), (int) (mSource2.cols() * 1.2));
-//            MatOfPoint point = new MatOfPoint(points);
-//            Imgproc.fillConvexPoly(whiteMat, point, new Scalar(255.0, 255.0, 255.0));
-//            addShowBitmap("多边形区域", whiteMat);
-
             //矩形
             Imgproc.rectangle(mSource2, rect, new Scalar(255.0, 255.0, 0.0), 4, Imgproc.LINE_8);
             Mat temp = mSource.submat(rect);
             validMats.add(temp);
-            //addShowBitmap("子区域", temp);
+            addShowBitmap("子区域", temp);
         }
 
         // 释放内存
@@ -333,7 +310,7 @@ public class ProcessingActivity extends AppCompatActivity {
             Bitmap bitmapTemp = Bitmap.createBitmap(subSrc.cols(), subSrc.rows(), Bitmap.Config.ARGB_8888);
             org.opencv.android.Utils.matToBitmap(subSrc, bitmapTemp);
             String str = tessTwoUtils.orcDiscern(bitmapTemp);
-            addShowBitmap(str, bitmapTemp);
+            //addShowBitmap(str, bitmapTemp);
             if (i == 3) {
                 break;
             }
@@ -359,6 +336,22 @@ public class ProcessingActivity extends AppCompatActivity {
 
         Imgproc.fillConvexPoly(mat, matOfPoint, new Scalar(0, 0, 0));
         addShowBitmap("多边形区域", mat);
+    }
+
+    private void dispose3() {
+        Mat src = Imgcodecs.imread(imagePath);
+        if (src.empty()) {
+            return;
+        }
+
+        Mat source = src.clone();
+
+        Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2RGB);
+        Mat source2 = src.clone();
+        Imgproc.bilateralFilter(src, source2, 5, 200, 200.0);
+        addShowBitmap("双边滤波", source2);
+
+
     }
 
     private void addShowBitmaps(String title, List<Mat> srcList) {
